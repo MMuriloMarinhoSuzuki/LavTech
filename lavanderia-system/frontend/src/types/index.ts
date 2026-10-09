@@ -41,6 +41,7 @@ export interface Service {
   unit: ServiceUnit;
   price: number;
   estimated_days: number;
+  icon: string | null;
   active: number;
   created_at: string;
   updated_at: string;

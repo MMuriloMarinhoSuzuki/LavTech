@@ -74,6 +74,7 @@ export interface ServicePayload {
   unit: Service['unit'];
   price: number;
   estimated_days: number;
+  icon?: string;
 }
 
 export const serviceService = {

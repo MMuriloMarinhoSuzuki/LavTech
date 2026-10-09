@@ -7,7 +7,8 @@ const serviceSchema = z.object({
   category: z.enum(['washing', 'dyeing', 'ironing', 'special']),
   unit: z.enum(['kg', 'piece', 'unit']),
   price: z.number().positive('Preço deve ser positivo'),
-  estimated_days: z.number().int().min(0, 'Dias estimados deve ser >= 0').default(1)
+  estimated_days: z.number().int().min(0, 'Dias estimados deve ser >= 0').default(1),
+  icon: z.string().trim().max(40).optional().nullable()
 });
 
 export const serviceController = {

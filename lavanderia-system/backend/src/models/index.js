@@ -99,14 +99,14 @@ export const serviceModel = {
   },
   findById: (id) => db.prepare('SELECT * FROM services WHERE id = ?').get(id),
   create: (data) => {
-    const stmt = db.prepare(`INSERT INTO services (name, description, category, unit, price, estimated_days) VALUES (?, ?, ?, ?, ?, ?)`);
-    const result = stmt.run(data.name, data.description ?? null, data.category, data.unit, data.price, data.estimated_days ?? 1);
+    const stmt = db.prepare(`INSERT INTO services (name, description, category, unit, price, estimated_days, icon) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+    const result = stmt.run(data.name, data.description ?? null, data.category, data.unit, data.price, data.estimated_days ?? 1, data.icon ?? null);
     return { id: result.lastInsertRowid, ...data };
   },
   update: (id, data) => {
     const fields = [];
     const values = [];
-    const allowed = ['name', 'description', 'category', 'unit', 'price', 'estimated_days', 'active'];
+    const allowed = ['name', 'description', 'category', 'unit', 'price', 'estimated_days', 'icon', 'active'];
     for (const key of allowed) {
       if (data[key] !== undefined) {
         fields.push(`${key} = ?`);

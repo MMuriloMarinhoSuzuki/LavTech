@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   Plus,
@@ -24,6 +24,13 @@ import { useToast } from '@/context/ToastContext';
 import { serviceService, type ServicePayload } from '@/services/api';
 import { getErrorMessage } from '@/utils/api';
 import { cn, formatCurrency, serviceCategories, serviceUnits } from '@/utils/format';
+import {
+  ServiceIcon,
+  SERVICE_ICON_OPTIONS,
+  guessServiceIcon,
+  isServiceIconKey,
+} from '@/components/service-icons';
+import type { ServiceIconKey } from '@/components/service-icons';
 import type { Service, ServiceCategory } from '@/types';
 
 const categoryIcons: Record<ServiceCategory, typeof Droplets> = {
@@ -54,8 +61,16 @@ export function Services() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ServicePayload>();
+
+  const [selectedIcon, setSelectedIcon] = useState<ServiceIconKey>('default');
+  const manualIconRef = useRef(false);
+  const iconName = watch('name');
+  useEffect(() => {
+    if (!manualIconRef.current) setSelectedIcon(guessServiceIcon(iconName ?? ''));
+  }, [iconName]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,6 +99,8 @@ export function Services() {
       price: 0,
       estimated_days: 1,
     });
+    manualIconRef.current = false;
+    setSelectedIcon(guessServiceIcon(''));
     setModalOpen(true);
   };
 
@@ -97,6 +114,8 @@ export function Services() {
       price: service.price,
       estimated_days: service.estimated_days,
     });
+    manualIconRef.current = true;
+    setSelectedIcon(isServiceIconKey(service.icon) ? service.icon : guessServiceIcon(service.name));
     setModalOpen(true);
   };
 
@@ -106,6 +125,7 @@ export function Services() {
       ...data,
       price: Number(data.price),
       estimated_days: Number(data.estimated_days),
+      icon: selectedIcon,
     };
     try {
       if (editing) {
@@ -220,7 +240,6 @@ export function Services() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((service) => {
               const cat = serviceCategories[service.category];
-              const Icon = categoryIcons[service.category];
               return (
                 <div
                   key={service.id}
@@ -233,7 +252,7 @@ export function Services() {
                         cat.gradient
                       )}
                     >
-                      <Icon className="h-6 w-6" />
+                      <ServiceIcon icon={service.icon} className="h-6 w-6" />
                     </div>
                     {service.category === 'special' && (
                       <span className={cn('badge', cat.bg, cat.color)}>
@@ -313,6 +332,37 @@ export function Services() {
             error={errors.name?.message}
             {...register('name')}
           />
+          <div>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Ícone do serviço</p>
+            <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-7">
+              {SERVICE_ICON_OPTIONS.map((option) => {
+                const active = selectedIcon === option.key;
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    title={option.label}
+                    onClick={() => {
+                      manualIconRef.current = true;
+                      setSelectedIcon(option.key);
+                    }}
+                    className={cn(
+                      'flex h-12 flex-col items-center justify-center gap-1 rounded-lg border transition-colors',
+                      active
+                        ? 'border-brand-400 bg-brand-50 text-brand-600'
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50'
+                    )}
+                  >
+                    <option.Component className="h-5 w-5" />
+                    <span className="text-[9px] font-medium leading-none">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1.5 text-xs text-slate-400">
+              Sugerido automaticamente pelo nome do serviço — clique em outro para trocar.
+            </p>
+          </div>
           <Textarea
             label="Descrição"
             placeholder="Descreva o serviço oferecido..."

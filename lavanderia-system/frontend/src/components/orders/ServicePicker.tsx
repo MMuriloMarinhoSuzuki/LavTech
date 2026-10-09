@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Check, Search } from 'lucide-react';
 import { cn, formatCurrency, serviceCategories, serviceUnits } from '@/utils/format';
+import { ServiceIcon } from '@/components/service-icons';
 import type { Service } from '@/types';
 
 interface ServicePickerProps {
@@ -65,6 +66,9 @@ export function ServicePicker({ services, addedIds, onAdd }: ServicePickerProps)
                   : 'border-slate-200 bg-white hover:border-brand-300 hover:bg-brand-50/40'
               )}
             >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-50 to-aqua-50 text-brand-600">
+                <ServiceIcon icon={service.icon} className="h-5 w-5" />
+              </span>
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5">
                   {added && <Check className="h-3.5 w-3.5 shrink-0 text-brand-600" />}

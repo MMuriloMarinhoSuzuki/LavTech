@@ -56,6 +56,7 @@ const createSchema = () => {
       unit TEXT NOT NULL CHECK (unit IN ('kg', 'piece', 'unit')),
       price DECIMAL(10,2) NOT NULL,
       estimated_days INTEGER DEFAULT 1,
+      icon TEXT,
       active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -116,6 +117,45 @@ const runMigrations = () => {
   addColumn('payment_method', 'payment_method TEXT');
   addColumn('payment_status', "payment_status TEXT NOT NULL DEFAULT 'pending'");
   addColumn('paid_at', 'paid_at DATETIME');
+
+  // Migração dos ícones de serviço (feature "ícone por serviço").
+  const svcColumns = db
+    .prepare("SELECT name FROM pragma_table_info('services')")
+    .all()
+    .map((c) => c.name);
+  if (!svcColumns.includes('icon')) {
+    db.exec('ALTER TABLE services ADD COLUMN icon TEXT');
+    console.log('  • Migração aplicada: services.icon');
+  }
+  // Retrofill: serviços já existentes ganham ícone pelo nome.
+  const backfillIcons = [
+    ['bermuda', 'bermuda'],
+    ['calça', 'calca'],
+    ['calca', 'calca'],
+    ['camiseta', 'camiseta'],
+    ['camisa', 'camiseta'],
+    ['moletom', 'moletom'],
+    ['vestido', 'vestido'],
+    ['edredom', 'edredom'],
+    ['cobertor', 'edredom'],
+    ['tapete', 'tapete'],
+    ['couro', 'couro'],
+    ['tênis', 'tenis'],
+    ['tenis', 'tenis'],
+    ['mochila', 'mochila'],
+    ['pelúcia', 'pelucia'],
+    ['ursinho', 'pelucia'],
+    ['lavagem', 'lavagem'],
+    ['roupa', 'lavagem'],
+    ['higienização', 'higieniza'],
+  ];
+  for (const [keyword, icon] of backfillIcons) {
+    db.prepare('UPDATE services SET icon = ? WHERE icon IS NULL AND name LIKE ?').run(
+      icon,
+      `%${keyword}%`
+    );
+  }
+  db.prepare("UPDATE services SET icon = 'default' WHERE icon IS NULL").run();
 };
 
 const seedAdmin = () => {
@@ -157,7 +197,7 @@ const seedServices = () => {
   if (count > 0) return;
 
   const insert = db.prepare(
-    'INSERT INTO services (name, description, category, unit, price, estimated_days) VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO services (name, description, category, unit, price, estimated_days, icon) VALUES (?, ?, ?, ?, ?, ?, ?)'
   );
   const services = [
     [
@@ -167,6 +207,7 @@ const seedServices = () => {
       'kg',
       28.0,
       2,
+      'lavagem',
     ],
     [
       'Tingimento de Camiseta',
@@ -175,6 +216,7 @@ const seedServices = () => {
       'piece',
       35.0,
       3,
+      'camiseta',
     ],
     [
       'Tingimento de Calça',
@@ -183,6 +225,7 @@ const seedServices = () => {
       'piece',
       45.0,
       3,
+      'calca',
     ],
     [
       'Tingimento de Bermuda',
@@ -191,6 +234,7 @@ const seedServices = () => {
       'piece',
       40.0,
       3,
+      'bermuda',
     ],
     [
       'Tingimento de Moletom',
@@ -199,6 +243,7 @@ const seedServices = () => {
       'piece',
       55.0,
       3,
+      'moletom',
     ],
     [
       'Tingimento de Vestido',
@@ -207,6 +252,7 @@ const seedServices = () => {
       'piece',
       50.0,
       3,
+      'vestido',
     ],
     [
       'Lavagem e Higienização de Tapetes',
@@ -215,6 +261,7 @@ const seedServices = () => {
       'piece',
       80.0,
       3,
+      'tapete',
     ],
     [
       'Lavagem de Edredons e Cobertores',
@@ -223,6 +270,7 @@ const seedServices = () => {
       'piece',
       60.0,
       3,
+      'edredom',
     ],
     [
       'Renovação de Couro',
@@ -231,6 +279,7 @@ const seedServices = () => {
       'piece',
       150.0,
       3,
+      'couro',
     ],
     [
       'Lavagem de Tênis e Mochilas',
@@ -239,6 +288,7 @@ const seedServices = () => {
       'piece',
       45.0,
       2,
+      'tenis',
     ],
   ];
   const tx = db.transaction(() => {
