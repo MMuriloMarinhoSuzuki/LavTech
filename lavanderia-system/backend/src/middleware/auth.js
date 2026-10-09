@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
+import { userModel } from '../models/index.js';
 
 export const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -9,7 +10,14 @@ export const authenticate = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    // Sempre confere se o usuário ainda existe e está ativo. Um token antigo
+    // (ex.: após db:reset ou exclusão de usuário) vira 401 limpo, em vez de
+    // quebrar em erro de FOREIGN KEY no banco.
+    const user = userModel.findById(decoded.id);
+    if (!user || !user.active) {
+      return res.status(401).json({ error: 'Sessão expirada. Faça login novamente.' });
+    }
+    req.user = { id: user.id, name: user.name, email: user.email, role: user.role };
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Token inválido ou expirado' });
