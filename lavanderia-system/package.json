@@ -1,0 +1,17 @@
+{
+  "name": "lavanderia-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestão de lavanderia — on-premise, Linux e Windows",
+  "type": "module",
+  "scripts": {
+    "setup": "npm --prefix backend install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "start": "node scripts/start.mjs",
+    "dev": "node scripts/dev.mjs",
+    "db:reset": "node scripts/reset-db.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

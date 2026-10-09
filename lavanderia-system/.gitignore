@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Environment (contém segredos; use o .env.example como base)
+.env
+.env.local
+.env.*.local
+
+# Banco de dados — o arquivo .db é VERSIONADO como backup;
+# apenas os arquivos transientes do SQLite ficam fora do controle de versão.
+backend/data/*.db-wal
+backend/data/*.db-shm
+backend/data/*.db-journal
+backend/data/*.db-bak
+backend/data/*.db-old
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp

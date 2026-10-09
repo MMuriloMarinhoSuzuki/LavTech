@@ -1,0 +1,28 @@
+# ============================================================
+# Lavanderia System — .gitignore
+# O banco (backend/data/*.db) é VERSIONADO de propósito, como
+# backup. Apenas os arquivos transientes do SQLite ficam de fora.
+# ============================================================
+
+# Dependências de pacotes
+node_modules/
+
+# Ambiente local (segredos) — versionar apenas .env.example
+backend/.env
+.env.local
+.env.*.local
+
+# Build do frontend (gerado: ./start.sh recompila quando falta)
+frontend/dist/
+
+# Banco de dados — arquivos transientes do SQLite ficam fora do git
+backend/data/*.db-wal
+backend/data/*.db-shm
+backend/data/*.db-journal
+backend/data/*.db-bak
+backend/data/*.db-old
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
+Thumbs.db
